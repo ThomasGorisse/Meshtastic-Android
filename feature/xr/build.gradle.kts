@@ -48,6 +48,8 @@ dependencies {
     implementation(libs.androidx.xr.compose)
     implementation(libs.androidx.xr.runtime)
     implementation(libs.androidx.xr.scenecore)
+    // The same table on phones: SceneView draws it in ARCore, on a surface the user taps.
+    implementation("io.github.sceneview:arsceneview:${libs.versions.sceneview.get()}")
 
     testImplementation(kotlin("test-junit"))
     // configureTestOptions() turns on useJUnitPlatform(), so the vintage engine is what runs JUnit 4 tests.

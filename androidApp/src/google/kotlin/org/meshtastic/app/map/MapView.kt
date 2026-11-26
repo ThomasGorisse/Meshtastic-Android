@@ -185,6 +185,7 @@ import org.meshtastic.core.resources.heading
 import org.meshtastic.core.resources.latitude
 import org.meshtastic.core.resources.longitude
 import org.meshtastic.core.resources.manage_map_layers
+import org.meshtastic.core.resources.xr_terrain_on_desk
 import org.meshtastic.core.resources.map_tile_source
 import org.meshtastic.core.resources.now
 import org.meshtastic.core.resources.position
@@ -200,6 +201,7 @@ import org.meshtastic.core.ui.component.Quality
 import org.meshtastic.core.ui.icon.Layers
 import org.meshtastic.core.ui.icon.Map
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.ViewInAr
 import org.meshtastic.core.ui.theme.TracerouteColors
 import org.meshtastic.core.ui.util.ActiveWhileStarted
 import org.meshtastic.core.ui.util.KeepScreenOn
@@ -221,6 +223,7 @@ import org.meshtastic.feature.map.component.CustomMapLayersSheet
 import org.meshtastic.feature.map.component.DeleteWaypointDialog
 import org.meshtastic.feature.map.component.EditWaypointDialog
 import org.meshtastic.feature.map.component.MapButton
+import org.meshtastic.feature.xr.LocalOpenDeskTable
 import org.meshtastic.feature.map.component.MapControlsOverlay
 import org.meshtastic.feature.map.component.MapFilterSheet
 import org.meshtastic.feature.map.component.MeshMapFitPadding
@@ -1179,6 +1182,15 @@ fun MapView(
                     contentDescription = stringResource(Res.string.manage_map_layers),
                     onClick = { showLayersBottomSheet = true },
                 )
+                // The mesh's terrain as a table on a real surface, through ARCore: the main map only.
+                val openDeskTable = LocalOpenDeskTable.current
+                if (mode is GoogleMapMode.Main && openDeskTable != null) {
+                    MapButton(
+                        icon = MeshtasticIcons.ViewInAr,
+                        contentDescription = stringResource(Res.string.xr_terrain_on_desk),
+                        onClick = openDeskTable,
+                    )
+                }
             },
             // Hands params to the hosted Site Planner and imports the returned coverage.
             onSitePlannerClick = {

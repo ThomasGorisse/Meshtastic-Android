@@ -29,6 +29,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -83,8 +85,12 @@ fun SpatialShell(
             onDispose {}
         }
     }
+    var tableShown by remember { mutableStateOf(!spatial && opensArTableAtLaunch(context)) }
     Box(modifier.fillMaxSize()) {
-        content()
+        // Off XR, the map's toolbar opens the table on the camera through this.
+        CompositionLocalProvider(LocalOpenDeskTable provides if (spatial) null else ({ tableShown = true })) {
+            content()
+        }
         if (spatial) {
             // The main panel keeps its Home Space size; sizing it resizes the window and recreates the activity.
             Orbiter(position = OrbiterPosition.BottomCenter()) {
@@ -111,9 +117,29 @@ fun SpatialShell(
                 inFullSpace = false,
                 modifier = Modifier.align(Alignment.BottomStart).safeDrawingPadding().padding(16.dp),
             )
+            // On a phone the same table stands on a real surface, through the camera.
+            if (tableShown) {
+                val made = debugNodes()
+                ArTerrainTable(
+                    made ?: nodes,
+                    imagery,
+                    buildings,
+                    if (made === CITY) CITY_ROUTE else route,
+                    contourUnits,
+                    buildDispatcher,
+                    demo = made != null,
+                    onDismiss = { tableShown = false },
+                )
+            }
         }
     }
 }
+
+/**
+ * Opens the terrain table on the camera, for a phone's map toolbar: null on Android XR, where the orbiter's map button
+ * opens it beside the panel, and outside [SpatialShell].
+ */
+val LocalOpenDeskTable = staticCompositionLocalOf<(() -> Unit)?> { null }
 
 /** Draws nothing without an XR session, so phones and tablets never see it. */
 @Composable
@@ -139,7 +165,7 @@ internal fun opensMapAtLaunch(context: Context): Boolean =
     context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE != 0 && Log.isLoggable("MeshXrMap", Log.DEBUG)
 
 /** Made-up nodes in place of the mesh, when one of the switches below is set on top of the map hook. */
-private fun debugNodes(): List<SpatialNodeSnapshot>? = when {
+internal fun debugNodes(): List<SpatialNodeSnapshot>? = when {
     Log.isLoggable("MeshXrPeaks", Log.DEBUG) -> PEAKS
     Log.isLoggable("MeshXrCity", Log.DEBUG) -> CITY
     else -> null
@@ -149,7 +175,7 @@ private val GOOD = SpatialSignal.GOOD
 private val BAD = SpatialSignal.BAD
 
 /** `log.tag.MeshXrCity DEBUG`: downtown Seattle, a circle small enough for a downloaded basemap's buildings. */
-private val CITY =
+internal val CITY =
     listOf(
         city(1, 47.6062, -122.3321, "DOWN", 0xFF7886EE).copy(isConnectedRadio = true),
         city(2, 47.6205, -122.3493, "NDL", 0xFFF2C14E).copy(hopsAway = 0, signal = GOOD),
@@ -162,7 +188,7 @@ private fun city(id: Long, latitude: Double, longitude: Double, name: String, co
     SpatialNodeSnapshot(id, LatLon(latitude, longitude), shortName = name, color = color.toInt())
 
 /** A trace route over [CITY]: out by way of NDL to CAPH, and straight back. */
-private val CITY_ROUTE = TerrainRoute(forward = listOf(1, 2, 4), back = listOf(4, 1))
+internal val CITY_ROUTE = TerrainRoute(forward = listOf(1, 2, 4), back = listOf(4, 1))
 
 /** `log.tag.MeshXrPeaks DEBUG`: around Mount Rainier, to check relief, towers and links on ground that has some. */
 private val PEAKS =

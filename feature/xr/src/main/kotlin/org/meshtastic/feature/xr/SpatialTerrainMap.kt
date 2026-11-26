@@ -137,7 +137,7 @@ private enum class TerrainStatus {
 
 /** What the map stands on once built, and what to say about it. */
 @Suppress("LongParameterList")
-private class BuiltTerrain(
+internal class BuiltTerrain(
     val geometry: SpatialTerrainGeometry,
     val terrain: TerrainMeshData,
     /** The table's side, apart from [terrain] when an image is draped on it. */
@@ -872,14 +872,14 @@ private fun createMesh(session: Session, data: TerrainMeshData): CustomMesh {
 }
 
 /** What to draw on the ground: the image over it, the buildings, the contour lines and a trace route. */
-private class TerrainLayers(
+internal class TerrainLayers(
     val imagery: TerrainImagery?,
     val buildings: TerrainBuildingSource?,
     val contours: ContourUnits?,
     val route: TerrainRoute?,
 )
 
-private suspend fun buildTerrain(
+internal suspend fun buildTerrain(
     circle: SpatialCircle,
     nodes: List<SpatialNodeSnapshot>,
     layers: TerrainLayers,
@@ -947,7 +947,7 @@ private suspend fun sampleGround(frame: SpatialFrame, http: HttpClient): Spatial
     return SpatialHeightGrid.sample(frame, plan, source).cleaned()
 }
 
-private suspend fun hasBuildings(source: TerrainBuildingSource): Boolean = try {
+internal suspend fun hasBuildings(source: TerrainBuildingSource): Boolean = try {
     source.available()
 } catch (e: CancellationException) {
     throw e

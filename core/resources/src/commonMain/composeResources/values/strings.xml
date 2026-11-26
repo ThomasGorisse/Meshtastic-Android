@@ -2552,6 +2552,7 @@
     <string name="xr_terrain_layer_elevation">Elevation</string>
     <string name="xr_terrain_loading">Building the terrain…</string>
     <string name="xr_terrain_map">3D map</string>
+    <string name="xr_terrain_on_desk">View on your desk</string>
     <string name="xr_terrain_unavailable">The terrain could not be loaded. Check the connection and try again.</string>
     <string name="xr_terrain_zoom">Zoom</string>
     <string name="you">You</string>
